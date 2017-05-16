@@ -11,27 +11,35 @@
         <header>
             <div class="container">
                 <h1>BinderFilter</h1>
-                <h2>A kernel firewall for Android IPC</h2>
 
-                <section id="downloads">
-                    <a href="https://github.com/dxwu/" class="btn">David Wu</a>
-		    <a href="https://github.com/kirtivr/" class="btn">Kirti V.R</a>
-		    <a href="http://cs.dartmouth.edu/~sergey" target="_blank" class="btn">Sergey Bratus</a>
-                </section>
             </div>
         </header>
-        <div class="container">
-          <section id="main_content">
+
+	<!--<figure id="float_left" style="">
+	      <img src="./assets/images/man_in_binder.jpeg" alt=""/>
+	      <figcaption><a href="https://www.blackhat.com/docs/eu-14/materials/eu-14-Artenstein-Man-In-The-Binder-He-Who-Controls-IPC-Controls-The-Droid.pdf" style="display:block;">Android IPC through Binder</a></figcaption>
+	</figure> !-->
+
+	
+	<div class="container">
+	  
+	 <figure>
+	    <img src="./assets/images/binder.png" alt=""/>
+	    <figcaption>binderfilter -s -m "android.permission.CAMERA" -u _facebook_uid_ -a 3 --modify-data="cat.jpg"</figcaption>
+	    <img src="./assets/images/binderfilter3.png" alt=""/>
+	 </figure>
+	 
+	  <section id="main_content">
 	    BinderFilter is a context-aware IPC firewall for Android that dynamically filters messages based on environmental data.
-	    It can both block and modify IPC messages send through Binder, which is in a position of complete mediation in Android.
+	    It can both block and modify IPC messages send through Binder which is in a position of complete mediation in Android, including intents and permissions.
 	    Our Binder hooking framework is able to mitigate broad classes of cross-app attacks, such as collusion and UI-based activity hijacking attacks.
-	    Once BinderFilter is set up on an Android device, Picky, a policy application can be used to create contextual application specific policies.
+	    Once BinderFilter is set up on an Android device, Picky, a policy application can be used to create contextual application-specific policies.
 	    A Python IPTables-like interface is present for this purpose as well. Lua dissectors are available for analysing Binder traffic in realtime.
 	    </section>
 	    <section id="code">
 	      <h2>Project code</h2>
 	      <a href="https://github.com/BinderFilter/BinderFilter" class="btn btn-github" target="_blank"><span class="icon"></span>BinderFilter</a>
-	      <a href="https://github.com/dxwu/Picky" class="btn btn-github" target="_blank"><span class="icon"></span>Picky, the userland policy configuration app</a>
+	      <a href="https://github.com/BinderFilter/Picky" class="btn btn-github" target="_blank"><span class="icon"></span>Picky, the userland policy configuration app</a>
 	    </section>
 	    <section id="documents">
 	      <h2>Talks, Slides and Reports</h2>	      

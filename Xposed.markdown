@@ -1,4 +1,4 @@
-* Xposed Framework for Android - Some motivation
+# Xposed Framework for Android - Some motivation
 
 As you know, most of the Android OS is open source. The proprietary parts are those that are vendor specific, flashed onto the /vendor
 partition of your filesystem. Being open source means that Android is fully customizable. You can download, modify, compile and run Android from source by following the guide here (https://source.android.com/setup/downloading).
@@ -27,18 +27,18 @@ As an example, if you want to change what the default Android clock displays, yo
 
 Some more motivation because little motivation is more harmful than no motivation..
 
-*Irritated with all the background services that consume most of your battery charge and want to choose which ones to enable?*
+##Irritated with all the background services that consume most of your battery charge and want to choose which ones to enable?##
 
 There is an Xposed module for that (https://www.androidauthority.com/improve-battery-life-xposed-amplify-greenify-668844/). It deals with power consuming
 background services in a stricter way than the Android OS does.
 
-*Want to change what happens when you press the Power buttton ?*
+##Want to change what happens when you press the Power buttton ?##
 There is an Xposed module for that (Advanced Power Menu+ (APM+)).
 
-*Do you want to cheat on Pokemon Go and feed the app made up locations ?*
+##Do you want to cheat on Pokemon Go and feed the app made up locations ?##
 There is an Xposed module for that - XPrivacy ( which actually does a lot more - https://github.com/M66B/XPrivacy ).
 
-*Want to hook libbinder.so to inter-mediate most IPC on your Android phone ?*
+##Want to hook libbinder.so to inter-mediate most IPC on your Android phone ?##
 You can't write an Xposed module for that. The reason will be clear after our dive into how the findAndHookMethod works behind the scenes. Essentially, Xposed relies on the ability to move the hooked method to another location, replacing it with a proxy
 which may eventually call the original method. It cannot move methods in shared libraries this way.
 If you want to hook function calls in shared libraries such as libbinder.so though check out Frida trace - https://www.frida.re/docs/frida-trace/ 
@@ -47,7 +47,7 @@ You can browse existing Xposed repos here http://repo.xposed.info/module-overvie
 
 It is quite easy to write your own Xposed module. See the next section to learn how to do so.
 
-* Xposed - How to install
+# Xposed - How to install
 
 To work with Xposed, a pre-requisite is a rooted phone.
 For instructions on how to root your phone, refer to
@@ -71,7 +71,7 @@ http://api.xposed.info/reference/packages.html
 
 Reading the source is quite illuminating as well.
 
-* Xposed initialization- a high level overview
+# Xposed initialization- a high level overview
 
 There is a process that is called "Zygote". This is the heart of the Android runtime.
 Every application is started as a fork of it. This process is started by an init script when the phone is booted.
@@ -96,12 +96,12 @@ Any Xposed module implements one or more of the following interfaces :
 Our example implements IXposedHookLoadPackage and waits for the package "com.android.systemui" to load.
 Once loaded it hooks the method "updateClock".
 
-* How Xposed adds hooks to any method
+# How Xposed adds hooks to any method
 
 In the earlier motivating example, I mentioned that once you identify the method you want to hook into, you can use "findAndHookMethod" to add
 callbacks before and after the method is called.
 
-** The API of findAndHookMethod
+## The API of findAndHookMethod
 
 The hooking of the method updateClock() looks like this:
 
@@ -133,10 +133,10 @@ execute arbitraty code, and so on.
 b) afterHookedMethod which is called after updateClock() is called. It operates similarly.
 
 
-** findAndHookMethod explored
+## findAndHookMethod explored
 
 
-*** Part one - reaching XposedBridge
+### Part one - reaching XposedBridge
 
 The findAndHookMethod implementation just calls the overridden implementation of findAndHookMethod after obtatining the class corresponding to the className string.
 This is done using Class.forName, without initializing the Class (cf. https://stackoverflow.com/a/39768345 ), just loading the class into memory and
@@ -164,7 +164,7 @@ we obtain the "java.reflect.Method" object corresponding to the method we want t
 Next we call XposedBridge.hookMethod(m, callback) where m is the reflect method corresponding to the method we want to hook and
 callback is the callback hook we specified in our Xposed module.
 
-*** Part two - XposedBridge
+### Part two - XposedBridge
 
 hookMethod(Member hookMethod, XC_MethodHook callback) first appends our callback for updateClock() into a list of callbacks for updateClock().
 There may be multiple modules hooking the same methods for different reasons and so Xposed keeps a Map<method,callbacks> object to keep track of the
@@ -173,7 +173,7 @@ callbacks to be executed when a hooked method is called.
 After other bookkeeping logic, hookMethodNative() is called with the given Method m, callback list and additional information.
 hookMethodNative is declared as a 'native' method in XposedBridge which indicates to ART that the implementation of the method can be found elsewhere.
 
-*** Detour - How native methods are registered with JNI by Xposed
+### Detour - How native methods are registered with JNI by Xposed
 
 onVmCreated in app_main is the implementation of the virtual method defined in the Android Runtime. 
 It is called once when the runtime for the application is ready.
@@ -188,7 +188,7 @@ It in turn calls xposed::onVmCreated (https://github.com/rovo89/Xposed/blob/c851
    
 4. Calls xposed:onVmCreated (now mapped to onVmCreatedCommon) - https://github.com/rovo89/Xposed/blob/0307d5cd9612a9ec18ae8ed8b58e25d4ea3199d5/xposed.cpp#L417
 
-*onVmCreatedCommon(JNIEnv *env)* does a lot of heavy lifting after being called in xposed::onVmCreated at last - https://github.com/rovo89/Xposed/blob/4b9a7a612c180dc47019724a8e66e79f4f5e7e83/libxposed_common.cpp#L132
+onVmCreatedCommon(JNIEnv *env)* does a lot of heavy lifting after being called in xposed::onVmCreated at last - https://github.com/rovo89/Xposed/blob/4b9a7a612c180dc47019724a8e66e79f4f5e7e83/libxposed_common.cpp#L132
 
 It:
 
@@ -222,7 +222,7 @@ Note that the xposed_callback_method set on ArtMethod is the same as the one ini
 
 d) returns.
 
-*** Back to the point
+### Back to the point
 
 Recalling the function call in https://github.com/rovo89/XposedBridge/blob/art/app/src/main/java/de/robv/android/xposed/XposedBridge.java#L244 XposedBridge's hookMethod eventually calls hookMethodNative in JNI.
 
@@ -258,7 +258,7 @@ ArtMethod* artMethod = ArtMethod::FromReflectedMethod(soa, javaReflectedMethod);
 artMethod->EnableXposedHook(soa, javaAdditionalInfo);
 #+END_SRC
 
-*** The final piece of the puzzle - ART Magic
+### The final piece of the puzzle - ART Magic
 Thus we see that hookMethodNative gets the ARTMethod from the javaReflectedMethod passed in and
 executes EnableXposedHook on the ARTMethod with additionalInfo (which contains all the callbacks) as a parameter.
 Note that at runtime, all method calls (be it JNI or Java) are represented with ArtMethod which is a structure containing

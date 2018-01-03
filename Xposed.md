@@ -1,3 +1,9 @@
+---
+layout: page
+title: How Xposed Works
+permalink: /
+---
+
 # Xposed Framework for Android - Some motivation
 
 As you know, most of the Android OS is open source. The proprietary parts are those that are vendor specific, flashed onto the /vendor

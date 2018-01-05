@@ -13,48 +13,47 @@ This essentially gives you limitless power to modify how your Android phone work
 
 Android like any other OS makes trade-offs in the kernel and framework level to cater to the average smartphone user.
 There are a number of developers who have modified and recompiled Android from source in order to unlock new capabilities otherwise
-disabled in the "Stock" Android OS. These are called "custom ROMs". One such group is LineageOS which allows for CPU overclocking and
+disabled in the "Stock" Android OS. These are called "custom ROMs". One such option is LineageOS which allows for CPU overclocking and
 some really funky themes otherwise not possible in the "stock" Android ecosystem.
 
 For many though, rebuilding Android from the scratch is too painful (it really is..) while custom ROMs either do not accomplish
-what they want or accomplish a lot more than they are comfortable with.
+what they want or do a lot more than they are comfortable with.
 
 Xposed is a middleground for such people. You can use Xposed on a rooted "stock" Android to achieve effectively the same effects custom ROMs provide.
-Xposed is a "dynamic" hooking framework that allows developers to replace any method in any class (may it be in the framework, systemui or a custom app).
+Xposed is a "dynamic" hooking framework that allows developers to replace any method in any class (framework or a custom application).
 You can change parameters for the method call, modify the return value or skip the call to the method completely. People have used this for various
 applications in the past, such as to get around Twitter's character limit.
 
 As an example, if you want to change what the default Android clock displays, you can:
 
 1. Go through the source code of the status bar clock [here](https://android.googlesource.com/platform/frameworks/base/+/android-6.0.1_r25/packages/SystemUI/src/com/android/systemui/statusbar/policy/Clock.java)
-
 2. Notice that the method updateClock() is called every time the clock is to be updated, and override the method using
-
 3. Xposed's "findAndHookMethod" utility, which we will explore later on in this tutorial.
 
-Some more motivation because little motivation is more harmful than no motivation..
+Some more motivation because little motivation is more harmful than no motivation :)
 
-### Irritated with all the background services that consume most of your battery charge and want to choose which ones to enable?##
+#### Irritated with all the background services that consume most of your battery charge and want to choose which ones to enable?##
 
 There is an Xposed module for [that](https://www.androidauthority.com/improve-battery-life-xposed-amplify-greenify-668844/). It deals with power consuming
 background services in a stricter way than the Android OS does.
 
-### Want to change what happens when you press the Power buttton ?##
+#### Want to change what happens when you press the Power buttton ?##
 There is an Xposed module for that (Advanced Power Menu+ (APM+)).
 
-### Do you want to cheat on Pokemon Go and feed the app made up locations ?##
+#### Do you want to cheat on Pokemon Go and feed the app made up locations ?##
 There is an Xposed module for that - XPrivacy ( which actually does a lot [more](https://github.com/M66B/XPrivacy) ).
 
-### Want to hook libbinder.so to inter-mediate most IPC on your Android phone ?##
-You can't write an Xposed module for that. The reason will be clear after our dive into how the findAndHookMethod works behind the scenes. Essentially, Xposed relies on the ability to move the hooked method to another location, replacing it with a proxy
-which may eventually call the original method. It cannot move methods in shared libraries this way.
-If you want to hook function calls in shared libraries such as libbinder.so though check out [Frida](https://www.frida.re/docs/frida-trace/) trace
+#### Want to hook libbinder.so to inter-mediate most IPC on your Android phone ?
+You can't write an Xposed module for that. Essentially, Xposed relies on the ability to move the hooked method to another location, adding a proxy to the original method, which calls
+the hook, which eventually calls the original method at its new location. It cannot move methods in SYSTEM shared libraries this way .
+If you want to hook function calls in SYSTEM shared libraries such as libbinder.so though check out [Frida](https://www.frida.re/docs/frida-trace/) trace.
+Note that you can still hook non-system shared libraries loaded by your module with Xposed.
 
 You can browse existing Xposed repos [here](http://repo.xposed.info/module-overview) .
 
 It is quite easy to write your own Xposed module. See the next section to learn how to do so.
 
-# Xposed - How to install
+### Xposed - How to install
 
 To work with Xposed, a pre-requisite is a rooted phone.
 For instructions on how to root your phone, refer to
@@ -74,28 +73,26 @@ You can refer to the Xposed framework [API](http://api.xposed.info/reference/pac
 
 Reading the source is quite illuminating as well.
 
-# Xposed initialization- a high level overview
+### Xposed initialization- a high level overview
 
 There is a process that is called "Zygote". This is the heart of the Android runtime.
 Every application is started as a fork of it. This process is started by an init script when the phone is booted.
 The process start is done with /system/bin/app_process, which Xposed replaces with its own extended app_process.
-Check out screenshots in the folder that show how the app_process binary has been modified by Xposed.
 
 Xposed's implementation of [app_process](https://github.com/rovo89/Xposed/blob/master/app_main.cpp#L256) calls
 
 ```java
 xposed::initialize(zygote, startSystemServer, className, argc, argv);
 ```
-which adds XposedBridge.jar to CLASSPATH environment variable from #define XPOSED_JAR "/system/framework/XposedBridge.jar"
-and loads the modules declared at /data/data/de.robv.android.xposed.installer/conf/modules.list
+which adds XposedBridge.jar to the CLASSPATH and loads the modules declared at /data/data/de.robv.android.xposed.installer/conf/modules.list
 
-All the XposedInstaller does is extract and load the classes found in the apk as JAR and add the path to it in this list.
-Once you install an Xposed module you need to do a soft reboot which kills the process "zygote".
+All the XposedInstaller does is extract and load the classes found in the given module apk as JAR and add the path to it in this list.
+Once you install an Xposed module you need to do a soft reboot before using the module. The soft reboot kills the Zygote.
 
-Any Xposed module implements one or more of the following interfaces :
-1) IXposedHookInitPackageResources -  To hook when resources for an app are being initialized
-2) IXposedHookLoadPackage - To hook when a package is being loaded
-3) IXposedHookZygoteInit - To hook when the Zygote is being initialized.
+Any Xposed module implements one or more of the following interfaces:
+1. IXposedHookInitPackageResources -  To hook when resources for an app are being initialized
+2. IXposedHookLoadPackage - To hook when a package is being loaded
+3. IXposedHookZygoteInit - To hook when the Zygote is being initialized.
 
 Our example implements IXposedHookLoadPackage and waits for the package "com.android.systemui" to load.
 Once loaded it hooks the method "updateClock".
@@ -121,20 +118,14 @@ findAndHookMethod("com.android.systemui.statusbar.policy.Clock", classLoader, "u
 });
 ```
 
-We gave findAndHookMethod three params:
+We gave findAndHookMethod 4 params:
 
-1. className - for the method we want to hook.
-
-2. The classLoader is unique per package or application and is used internally to obtain the  class represented by className above.
-
-3. The actual method name.
-
-4. A method hook class in which we can override:
-
-a) beforeHookedMethod which is called before updateClock() is called. We can use to modify parameters to updateClock(), skip the call to updateClock() and
-execute arbitraty code, and so on.
-
-b) afterHookedMethod which is called after updateClock() is called. It operates similarly.
+- className - for the method we want to hook.
+- The classLoader is unique per package or application and is used internally to obtain the  class represented by className above.
+- The actual method name.
+- A method hook class in which we can override:
+  - beforeHookedMethod which is called before updateClock() is called. We can use to modify parameters to updateClock(), skip the call to updateClock() and execute arbitraty code, and so on.
+  - afterHookedMethod which is called after updateClock() is called. It operates similarly.
 
 
 ## findAndHookMethod explored
@@ -319,7 +310,7 @@ ENTRY art_quick_proxy_invoke_handler
 END art_quick_proxy_invoke_handler
 ```
 
-It eventually invokes artQuickProxyInvokeHandler defined here after setting up the registers just right.
+It eventually invokes artQuickProxyInvokeHandler as shown above after setting up the registers.
 artQuickProxyHandler eventually executes the following [lines](https://github.com/rovo89/android_art/blob/1076fab144164b4862641720da5f91e1e519130e/runtime/entrypoints/quick/quick_trampoline_entrypoints.cc#L876):
 
 ```
@@ -349,7 +340,7 @@ invokeOriginalMethodNative defined [here](https://github.com/rovo89/Xposed/blob/
 Finally our "afterHooked" callbacks are called in [here](https://github.com/rovo89/XposedBridge/blob/art/app/src/main/java/de/robv/android/xposed/XposedBridge.java#L374).
 
 
-* References/Notes
+### References/Notes
 
 ART/Dalvik itself which has been fundamentally modified by Xposed via modifying dex2oat primarily. ART does a few optimizations such as method inlining for short methods and direct calls to framework methods.
 Xposed disabled these optimizations. This way, all calls will require to lookup the methods entry point in the

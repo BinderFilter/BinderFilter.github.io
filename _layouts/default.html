@@ -1,69 +1,42 @@
 <!DOCTYPE html>
-<html lang="{{ site.lang | default: "en-US" }}">
-    <head>
-        <meta charset='utf-8'>
-        <meta http-equiv="X-UA-Compatible" content="chrome=1">
-        <link rel="stylesheet" href="./assets/css/style.css">
-        <title>BinderFilter, a kernel firewall for Android IPC</title>
-    </head>
-    <body>
+<html>
+  <head>
+    <meta charset='utf-8'>
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    <link rel="stylesheet" href="{{ '/assets/css/style.css' }}">
+    <title>{{ site.title | default: site.github.repository_name }} by {{ site.github.owner_name }}</title>
+  </head>
 
-        <header>
-            <div class="container">
-                <h1>BinderFilter</h1>
+  <body>
 
-            </div>
-        </header>
+    <header>
+      <div class="container">
+        <h1>{{ site.title | default: site.github.repository_name }}</h1>
+        <h2>{{ site.description | default: site.github.project_tagline }}</h2>
+	<a href="https://github.com/BinderFilter/BinderFilter" class="btn btn-github" target="_blank"><span class="icon"></span>BinderFilter</a>
+	<a href="https://github.com/BinderFilter/Picky" class="btn btn-github" target="_blank"><span class="icon"></span>Picky, the userland policy configuration app</a>
+      </div>
+    </header>
 
-	<!--<figure id="float_left" style="">
-	      <img src="./assets/images/man_in_binder.jpeg" alt=""/>
-	      <figcaption><a href="https://www.blackhat.com/docs/eu-14/materials/eu-14-Artenstein-Man-In-The-Binder-He-Who-Controls-IPC-Controls-The-Droid.pdf" style="display:block;">Android IPC through Binder</a></figcaption>
-	</figure> !-->
+    <div class="container">
+      <section id="main_content">
+        {{ content }}
+      </section>
+    </div>
 
-	
-	<div class="container">
-	  
-	 <figure>
-	    <img src="./assets/images/binder.png" alt=""/>
-	    <figcaption>user:~$ ./binderfilter -s -m "android.permission.CAMERA" -u _facebook_uid_ -a 3 --modify-data="cat.jpg"</figcaption>
-	    <img src="./assets/images/binderfilter3.png" alt=""/>
-	 </figure>
-	 
-	  <section id="main_content">
-	    BinderFilter is a context-aware IPC firewall for Android that dynamically filters messages based on environmental data.
-	    It can both block and modify IPC messages sent through Binder which is in a position of complete mediation in Android (including intents and permissions).
-	    Our Binder hooking framework is able to mitigate broad classes of cross-app attacks, such as collusion and UI-based activity hijacking attacks.
-	    Once BinderFilter is set up on an Android device, Picky, a policy application can be used to create contextual application-specific policies.
-	    A Python IPTables-like interface is present for this purpose as well. Lua dissectors are available for analysing Binder traffic in realtime.
-	    </section>
-	    <section id="code">
-	      <h2>Project code</h2>
-	      <a href="https://github.com/BinderFilter/BinderFilter" class="btn btn-github" target="_blank"><span class="icon"></span>BinderFilter</a>
-	      <a href="https://github.com/BinderFilter/Picky" class="btn btn-github" target="_blank"><span class="icon"></span>Picky, the userland policy configuration app</a>
-	    </section>
-	    <section id="Blog">
-	      <h2>Blog</h2>
-	      <p>
-		<a href="Xposed.md"> Fantastic hooks and where to find them - Xposed edition </a>
-	      </p>
-	    </section>
-	    <section id="documents">
-	      <h2>Talks, Slides and Reports</h2>	      
-	        <p/>
-                <a href="binderfilter_tr.pdf" target="_blank">Technical Report</a>
-                <p/>
-                <a href="Shmoocon2017-slides.pdf">Shmoocon(2017) slides</a> presenting further BinderFilter
-                work and an IPTables-like command line interface.
-                <p/>
-                <a href="Summercon2016-slides.pdf" target="_blank">SummerCon(2016) slides</a> presenting BinderFilter, Picky,
-                and analysis of how Binder messages travel through the Android stack.
-                <p/>
-	    </section>
-        </div>
-	<hr/>
-	<div class="container">
-             We thank <a href="https://www.ionic.com/">Ionic Security</a> for their support of our research in this project.
-	</footer>
-    </body>
+    {% if site.google_analytics %}
+    <script type="text/javascript">
+      var gaJsHost = (("https:" == document.location.protocol) ? "https://ssl." : "http://www.");
+      document.write(unescape("%3Cscript src='" + gaJsHost + "google-analytics.com/ga.js' type='text/javascript'%3E%3C/script%3E"));
+    </script>
+    <script type="text/javascript">
+      try {
+      var pageTracker = _gat._getTracker("{{ site.google_analytics }}");
+      pageTracker._trackPageview();
+      } catch(err) {}
+    </script>
+    {% endif %}
+  </body>
+
 </html>
 
